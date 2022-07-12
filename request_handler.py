@@ -1,5 +1,6 @@
+import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from views import get_all_animals, get_single_animal, get_all_employees, get_single_employee, get_all_locations, get_single_location, get_all_customers, get_single_customer
+from views import get_all_animals, get_single_animal, create_animal, get_all_employees, get_single_employee, create_employee, get_all_locations, get_single_location, create_location, get_all_customers, get_single_customer, create_customer
 
 # Here's a class. It inherits from another class.
 # For now, think of a class as a container for functions that
@@ -14,6 +15,11 @@ class HandleRequests(BaseHTTPRequestHandler):
     """
 
     def parse_url(self, path):
+        """
+        Parse url into pieces to see what data we should access.
+        Get resource (animals, locations, etc...),
+                then see if an index exists to get a single animal.
+        """
         # Just like splitting a string in JavaScript. If the
         # path is "/animals/1", the resulting list will
         # have "" at index 0, "animals" at index 1, and "1"
@@ -41,7 +47,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         headers on the response
 
         Args:
-            status (number): the status code to return to the front end
+                        status (number): the status code to return to the front end
         """
         self.send_response(status)
         self.send_header('Content-type', 'application/json')
@@ -107,13 +113,42 @@ class HandleRequests(BaseHTTPRequestHandler):
     def do_POST(self):
         """Handles POST requests to the server
         """
-        # Set response code to 'Created'
         self._set_headers(201)
-
         content_len = int(self.headers.get('content-length', 0))
         post_body = self.rfile.read(content_len)
-        response = f"received post request:<br>{post_body}"
-        self.wfile.write(response.encode())
+
+        # Convert JSON string to a Python dictionary
+        post_body = json.loads(post_body)
+
+        # Parse the URL
+        (resource, id) = self.parse_url(self.path)
+
+        # Initialize new animal
+        new_animal = None
+        new_location = None
+        new_employee = None
+        new_customer = None
+
+        # Add a new animal to the list. Don't worry about
+        # the orange squiggle, you'll define the create_animal
+        # function next.
+        if resource == "animals":
+            new_animal = create_animal(post_body)
+
+        if resource == "locations":
+            new_location = create_location(post_body)
+
+        if resource == "employees":
+            new_employee = create_employee(post_body)
+
+        if resource == "customers":
+            new_customer = create_customer(post_body)
+
+        # Encode the new animal and send in response
+        self.wfile.write(f"{new_animal}".encode())
+        self.wfile.write(f"{new_location}".encode())
+        self.wfile.write(f"{new_employee}".encode())
+        self.wfile.write(f"{new_customer}".encode())
 
     # Here's a method on the class that overrides the parent's method.
     # It handles any PUT request.
