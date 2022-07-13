@@ -24,7 +24,11 @@ ANIMALS = [
 
 
 def get_all_animals():
-    """Get all animals
+    """
+    Returns the list of animals
+
+    Returns:
+        list: animals collection
     """
     return ANIMALS
 
