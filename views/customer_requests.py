@@ -14,24 +14,6 @@ CUSTOMERS = [
 ]
 
 
-# def get_all_customers():
-#     """Get all customers"""
-
-#     return CUSTOMERS
-
-
-# def get_single_customer(id):
-#     """Get customer by id"""
-#     # Variable to hold the found customer, if it exists
-#     requested_customer = None
-
-#     for customer in CUSTOMERS:
-#         if customer["id"] == id:
-#             requested_customer = customer
-
-#     return requested_customer
-
-
 def get_all_customers():
     # Open a connection to the database
     with sqlite3.connect("./kennel.sqlite3") as conn:
