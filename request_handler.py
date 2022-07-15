@@ -2,7 +2,7 @@ import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 
-from views import get_all_animals, get_single_animal, create_animal, delete_animal, get_all_employees, get_single_employee, create_employee, delete_employee, get_all_locations, get_single_location, create_location, delete_location, get_all_customers, get_single_customer, create_customer, delete_customer, get_customers_by_email
+from views import get_all_animals, get_single_animal, create_animal, delete_animal, get_animals_by_location_id, get_animals_by_status, get_all_employees, get_single_employee, create_employee, delete_employee, get_all_locations, get_single_location, create_location, delete_location, get_all_customers, get_single_customer, create_customer, delete_customer, get_customers_by_email
 
 # Here's a class. It inherits from another class.
 # For now, think of a class as a container for functions that
@@ -90,8 +90,16 @@ class HandleRequests(BaseHTTPRequestHandler):
             (resource, query) = parsed
 
             # see if the query dictionary has an email key
+            # CUSTOMERS
             if query.get('email') and resource == 'customers':
                 response = get_customers_by_email(query['email'][0])
+
+            # ANIMALS
+            if query.get('location_id') and resource == 'animals':
+                response = get_animals_by_location_id(query['location_id'][0])
+
+            if query.get('status') and resource == 'animals':
+                response = get_animals_by_status(query['status'][0])
 
         self.wfile.write(response.encode())
 
