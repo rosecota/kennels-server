@@ -110,23 +110,32 @@ def get_single_animal(id):
     return requested_animal
 
 
-def create_animal(animal):
-    """Take the new dictionary representation sent by the client and append it to the ANIMALS list
+def create_animal(new_animal):
+    """Post animal
     """
-    # Get the id value of the last animal in the list
-    max_id = ANIMALS[-1]["id"]
+    with sqlite3.connect("./kennel.sqlite3") as conn:
+        db_cursor = conn.cursor()
 
-    # Add 1 to whatever that number is
-    new_id = max_id + 1
+        db_cursor.execute("""
+        INSERT INTO Animal
+            ( name, breed, status, location_id, customer_id )
+        VALUES
+            ( ?, ?, ?, ?, ?);
+        """, (new_animal['name'], new_animal['breed'],
+              new_animal['status'], new_animal['locationId'],
+              new_animal['customerId'], ))
 
-    # Add an `id` property to the animal dictionary
-    animal["id"] = new_id
+        # The `lastrowid` property on the cursor will return
+        # the primary key of the last thing that got added to
+        # the database.
+        id = db_cursor.lastrowid
 
-    # Add the animal dictionary to the list
-    ANIMALS.append(animal)
+        # Add the `id` property to the animal dictionary that
+        # was sent by the client so that the client sees the
+        # primary key in the response.
+        new_animal['id'] = id
 
-    # Return the dictionary with `id` property added
-    return animal
+    return json.dumps(new_animal)
 
 
 def delete_animal(id):
@@ -139,6 +148,35 @@ def delete_animal(id):
         DELETE FROM animal
         WHERE id = ?
         """, (id, ))
+
+
+def update_animal(id, new_animal):
+    with sqlite3.connect("./kennel.sqlite3") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        UPDATE Animal
+            SET
+                name = ?,
+                breed = ?,
+                status = ?,
+                location_id = ?,
+                customer_id = ?
+        WHERE id = ?
+        """, (new_animal['name'], new_animal['breed'],
+              new_animal['status'], new_animal['locationId'],
+              new_animal['customerId'], id, ))
+
+        # Were any rows affected?
+        # Did the client send an `id` that exists?
+        rows_affected = db_cursor.rowcount
+
+    if rows_affected == 0:
+        # Forces 404 response by main module
+        return False
+    else:
+        # Forces 204 response by main module
+        return True
 
 
 def get_animals_by_location_id(location_id):
