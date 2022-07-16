@@ -20,6 +20,8 @@ class Animal():
         location_id : str
         customer_id : str
             the id of the customer who placed the animal in the kennel
+        location
+            None
         """
         self.id = id
         self.name = name
@@ -27,3 +29,4 @@ class Animal():
         self.status = status
         self.location_id = location_id
         self.customer_id = customer_id
+        self.location = None
